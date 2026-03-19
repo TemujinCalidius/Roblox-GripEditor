@@ -85,20 +85,49 @@ Your Tool instance must have:
 
 ## Using the Output CFrame
 
-The "Print Grip CFrame to Output" button prints a code-ready string like:
+The "Print Grip CFrame to Output" button prints a code-ready string to the Output window:
 
-```lua
-CFrame.new(0.093, -0.454, 0.078) * CFrame.Angles(math.rad(-9.6), math.rad(-171.5), math.rad(-82.6))
+```
+[GripEditor] gripCFrame = CFrame.new(0.093, -0.454, 0.078) * CFrame.Angles(math.rad(-9.6), math.rad(-171.5), math.rad(-82.6))
 ```
 
-You can use this directly:
+### Option 1: Set grip directly when equipping
+
+In whatever script handles tool equipping, set `tool.Grip` before or after parenting the tool to the character:
 
 ```lua
--- Set grip in a script
+local tool = toolTemplate:Clone()
 tool.Grip = CFrame.new(0.093, -0.454, 0.078) * CFrame.Angles(math.rad(-9.6), math.rad(-171.5), math.rad(-82.6))
+tool.Parent = player.Backpack
+humanoid:EquipTool(tool)
 ```
 
-Or store it in a config table for your equip system to apply at runtime.
+### Option 2: Store in a config table (recommended for multiple tools)
+
+Keep grip values in a central config so they're easy to update:
+
+```lua
+-- GripConfig.lua
+return {
+    stone_axe = CFrame.new(0.093, -0.454, 0.078) * CFrame.Angles(math.rad(-9.6), math.rad(-171.5), math.rad(-82.6)),
+    stone_knife = CFrame.new(0.1, -0.3, 0.0) * CFrame.Angles(math.rad(0), math.rad(-90), math.rad(0)),
+    pickaxe = CFrame.new(0.0, -0.5, 0.1) * CFrame.Angles(math.rad(10), math.rad(-80), math.rad(-15)),
+}
+```
+
+Then apply when equipping:
+
+```lua
+local GripConfig = require(path.to.GripConfig)
+
+local tool = toolTemplate:Clone()
+tool.Grip = GripConfig[tool.Name] or CFrame.new()
+tool.Parent = player.Backpack
+```
+
+### Option 3: Set grip in the Tool's properties (no code needed)
+
+If you don't need to set grip at runtime, you can paste the values directly into the Tool's **Grip** property in Studio's Properties panel. However, this is harder to version-control and share across tools.
 
 ## Troubleshooting
 
